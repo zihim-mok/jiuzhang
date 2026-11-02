@@ -1,0 +1,29 @@
+# 复制为 config.yaml 后填写；config.yaml 含密钥，不随代码打包、不入日志
+service:
+  host: 127.0.0.1
+  port: 8000
+  # 模拟银行环境声明：所有数据为模拟数据
+  environment: simulation
+
+model:
+  # 主模型候选: deepseek / glm / qwen；未配置 api_key 时自动进入模拟替身模式
+  # 接口须 OpenAI 兼容（/v1/chat/completions）：模型用于意图分类 + 非执行类自然回复
+  provider: null          # deepseek | glm | qwen
+  model_name: null
+  api_base: null          # 例：https://api.deepseek.com/v1（带不带 /v1 均可，代码自动补全）
+  api_key: null           # 勿提交到公开仓库/日志；推荐用环境变量 MODEL_API_KEY 注入
+  timeout_seconds: 8      # 单次意图理解超时
+  intent_strategy: ai_first   # ai_first | rule_first；AI 不可输出写操作意图，规则处理原演示写流程
+  reply_mode: "on"          # on | off；只读结果的衔接语/一般个人财务常识回复
+  reply_timeout_seconds: 6   # 回复生成超时失败后保留模板，绝不影响业务执行
+  # 备用模型：主模型连续失败达 failover_threshold 次后切换（进程内单向，重启恢复主优先）
+  fallback:
+    provider: null
+    model_name: null
+    api_base: null
+    api_key: null
+    failover_threshold: 3
+
+database:
+  # 整数最小货币单位（分）存储
+  path: "app/data/banking_sim.db"

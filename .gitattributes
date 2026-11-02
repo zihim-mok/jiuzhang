@@ -1,0 +1,21 @@
+# 换行符统一由 git 管理：仓库内一律 LF，检出时按平台/文件类型还原
+* text=auto eol=lf
+
+# Windows 批处理与 PowerShell 必须保留 CRLF，否则脚本可能无法执行
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Shell 脚本必须 LF
+*.sh   text eol=lf
+
+# 二进制文件不做换行转换与文本 diff
+*.db      binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.zip     binary
+*.woff    binary
+*.woff2   binary

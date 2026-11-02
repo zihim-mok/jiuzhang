@@ -1,0 +1,167 @@
+{
+ "source": "转账确认样本集 transfer_confirm.csv（覆盖已确认 / 拒绝 / 过期三类状态）",
+ "total": 1958,
+ "status_counts": {
+  "已确认": 1742,
+  "已过期": 129,
+  "用户拒绝": 87
+ },
+ "amount_line_note": "数据集口径：金额≥500 元强制 L2；本项目口径：所有转账一律 L2（更保守，方向安全）",
+ "ttl_note": "数据集 TTL=5 分钟；本项目 TTL=30 分钟（TTL_DEFAULT_MIN）。过期语义一致：过期后表态 → CONFIRMATION_EXPIRED",
+ "cases": {
+  "expired": [
+   {
+    "confirm_id": "CFACEC8E53509613",
+    "amount": "2071.12",
+    "amount_cents": 207112,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CFF5B7CA1AE9B510",
+    "amount": "531.02",
+    "amount_cents": 53102,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CF58397622A7CEA8",
+    "amount": "1955.3",
+    "amount_cents": 195530,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CFFA3D6A2E99DD1E",
+    "amount": "1464.91",
+    "amount_cents": 146491,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CFF446B5F0E4DB2A",
+    "amount": "944.44",
+    "amount_cents": 94444,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CF799418A0C31E98",
+    "amount": "779.39",
+    "amount_cents": 77939,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CFFDED9FDE8B9156",
+    "amount": "1748.52",
+    "amount_cents": 174852,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CFED55951348E34D",
+    "amount": "1858.52",
+    "amount_cents": 185852,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CF9D8F876C8BFED8",
+    "amount": "516.17",
+    "amount_cents": 51617,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   },
+   {
+    "confirm_id": "CFE29A12F56D2BCC",
+    "amount": "2485.55",
+    "amount_cents": 248555,
+    "action": "发起单笔转账",
+    "ttl_minutes": 5.0
+   }
+  ],
+  "rejected": [
+   {
+    "confirm_id": "CF69186978BC722F",
+    "amount": "1068.18",
+    "amount_cents": 106818,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF7421FF805A8EFF",
+    "amount": "533.36",
+    "amount_cents": 53336,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF24CB9672286BD9",
+    "amount": "1010.77",
+    "amount_cents": 101077,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF4523A27F99D5FA",
+    "amount": "658.94",
+    "amount_cents": 65894,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF18FE3920B9CD7A",
+    "amount": "1439.12",
+    "amount_cents": 143912,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF20BF6833F0004F",
+    "amount": "823.2",
+    "amount_cents": 82320,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CFE72CA2BF05200B",
+    "amount": "1318.44",
+    "amount_cents": 131844,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF72306E90B5C97A",
+    "amount": "831.45",
+    "amount_cents": 83145,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF9A9BECDC9AC53E",
+    "amount": "1059.56",
+    "amount_cents": 105956,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF15BB471FBA5175",
+    "amount": "547.22",
+    "amount_cents": 54722,
+    "action": "发起单笔转账"
+   }
+  ],
+  "confirmed_small": [
+   {
+    "confirm_id": "CFA4F2190F2CDC3D",
+    "amount": "550.68",
+    "amount_cents": 55068,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CFD8CDDB57FE8CF5",
+    "amount": "504.0",
+    "amount_cents": 50400,
+    "action": "发起单笔转账"
+   },
+   {
+    "confirm_id": "CF1DC99070ADDA7D",
+    "amount": "518.56",
+    "amount_cents": 51856,
+    "action": "发起单笔转账"
+   }
+  ]
+ }
+}
