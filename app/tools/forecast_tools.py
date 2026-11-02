@@ -112,9 +112,12 @@ def cashflow_forecast(weekly_adjust_cents: int = 0, months_ahead: int = 3,
                       exclude_anomalies: bool = False) -> dict:
     """现金流预演：完整月均值确定性外推 + 参数化干预，假设显式、标注模拟预测。
 
+    weekly_adjust_cents 是「每周支出调整额」：正数=每周多花，负数=每周少花；
+    对月净现金流的影响为 −(调整额 × 52/12)，即少花则净额上升。
+
     exclude_anomalies 默认值 2026-10-22 由 True 改为 False（审阅问题 P0-2 连带修正）：
     - 原默认「先剔除 P1-P4 命中交易再取均值」，在只有几个月数据的场景下，**单笔大额异常
-      就能把月均支出拉走一大截**（seed：剔除后 2,753.19 元 vs 全口径 3,911.63 元，差 29.6%），
+      就能把月均支出拉走一大截**（seed：剔除后 2,753.19 元 vs 全口径 4,074.96 元，差 32.4%），
       而用户界面上只看到最终一个数字，不知道口径已被改动；
     - 现默认全口径（不做未声明的调整），同时把「剔除口径」的结果作为 sensitivity 一并返回，
       让差额显式暴露给用户与前端，而不是藏在默认值里。
@@ -191,8 +194,11 @@ def cashflow_forecast(weekly_adjust_cents: int = 0, months_ahead: int = 3,
         if gap_ratio >= 0.10 else "",
     }
 
-    # 干预：每周调整额按 52/12 折算为月度效应（整数千分位向下取整）
-    monthly_effect = (weekly_adjust_cents * 52) // 12
+    # 干预：weekly_adjust_cents 是「每周支出调整额」——正数=多花，负数=少花。
+    #   月度净现金流影响 = −(调整额 × 52/12)。先对绝对值取整再补符号，正负对称，
+    #   避免负数用 floor 时「少花 500」和「多花 500」相差 1 分。
+    _mag = (abs(weekly_adjust_cents) * 52) // 12
+    monthly_effect = -_mag if weekly_adjust_cents > 0 else _mag
     adjusted_net = avg_net + monthly_effect
 
     forecast_months = [_shift_month(sim_month, i) for i in range(1, months_ahead + 1)]
@@ -205,8 +211,10 @@ def cashflow_forecast(weekly_adjust_cents: int = 0, months_ahead: int = 3,
         if exclude_anomalies else
         (f"全口径计算（未剔除异常交易，其中命中 P1-P4 的共 {excluded} 笔；"
          f"如需剔除口径请传 exclude_anomalies=true）。"),
-        f"干预按每周 {weekly_adjust_cents / 100:,.2f} 元 × 52/12 折算为月度效应"
-        f"（整数千分位向下取整 = {monthly_effect} 分）。",
+        (f"干预按「每周支出{'增加' if weekly_adjust_cents > 0 else '减少'} "
+         f"{abs(weekly_adjust_cents) / 100:,.2f} 元」× 52/12 折算，"
+         f"月净现金流{'减少' if monthly_effect < 0 else '增加'} {abs(monthly_effect)} 分"
+         f"（分以下向下取整，正负对称）。"),
         "假设历史收支节奏延续，未考虑季节性与一次性事件。",
     ]
     if sensitivity["warning"]:

@@ -944,11 +944,12 @@ def _h_forecast(session: dict, text: str) -> tuple[list[dict], list[dict], dict 
     r = cashflow_forecast(weekly, 3, False)  # 默认全口径，不静默剔除异常交易
     d = r["data"]
     b, it, f, se = d["baseline"], d["intervention"], d["forecast"], d.get("sensitivity") or {}
+    eff = it["monthly_effect_cents"]
     blks = [
         B.text(f"预演结果（模拟预测）：基线月净现金流 {_fmt_yuan(b['monthly_avg_net_cents'])}，"
-               f"按每周{'增加' if weekly > 0 else '减少'} {_fmt_yuan(abs(weekly))} 折算 "
-               f"{_fmt_yuan(it['monthly_effect_cents'])}/月，预演月净现金流 "
-               f"**{_fmt_yuan(f['monthly_net_cents'])}**。"),
+               f"假设每周支出{'增加' if weekly > 0 else '减少'} {_fmt_yuan(abs(weekly))}，"
+               f"折算下来月净现金流{'增加' if eff > 0 else '减少'} {_fmt_yuan(abs(eff))}，"
+               f"预演月净现金流 **{_fmt_yuan(f['monthly_net_cents'])}**。"),
         B.table(["月份", "预演净现金流"],
                 [[m["month"], _fmt_yuan(m["net_cents"])] for m in f["per_month"]]),
         B.kv([["基线月均收入", _fmt_yuan(b["monthly_avg_income_cents"])],

@@ -105,11 +105,19 @@ check("S4-3 假设显式列出 + 模拟预测标注",
 
 st, r = call("GET", "/insights/forecast?weekly_adjust_cents=-50000&months_ahead=2")
 d = r["data"]
-effect = d["intervention"]["monthly_effect_cents"]  # -50000*52//12 = -216667
-check("S5 干预参数联动（每周少 500 → 月净额 575837）",
-      effect == -216667 and d["forecast"]["monthly_net_cents"] == FULL_NET + effect == 575837
+effect = d["intervention"]["monthly_effect_cents"]  # 少花 500/周 → 月度净额 +50000*52//12 = +216666
+check("S5 干预参数联动（每周少 500 → 月净额 1009170，方向必须为正）",
+      effect == 216666 and d["forecast"]["monthly_net_cents"] == FULL_NET + effect == 1009170
       and len(d["forecast"]["per_month"]) == 2,
       f"effect={effect} net={d['forecast']['monthly_net_cents']}")
+
+st, r2 = call("GET", "/insights/forecast?weekly_adjust_cents=50000&months_ahead=1")
+d2 = r2["data"]
+eff2 = d2["intervention"]["monthly_effect_cents"]
+check("S5b 多花与少花方向相反且绝对值相等（对称取整，不容许符号反向）",
+      eff2 == -216666 and d2["forecast"]["monthly_net_cents"] == FULL_NET - 216666 == 575838
+      and abs(eff2) == abs(effect),
+      f"effect={eff2} net={d2['forecast']['monthly_net_cents']}")
 
 st, r = call("GET", "/insights/forecast?exclude_anomalies=true")
 d = r["data"]
@@ -135,10 +143,11 @@ check("C1 收支报表意图走真实推断工具",
 st, r = call("POST", "/chat", {"message": "如果每周少花 500，帮我预演下未来三个月"})
 tools = [t["tool"] for t in r["tool_results"]]
 fc = r["tool_results"][0]["data"] if tools else {}
-check("C2 预演意图带假设（每周少 500 → -50000 分口径）",
+check("C2 预演意图带假设（每周少 500 → -50000 分口径，净额上升）",
       st == 200 and "insights.cashflow_forecast" in tools
       and fc.get("intervention", {}).get("weekly_adjust_cents") == -50000
-      and fc.get("forecast", {}).get("monthly_net_cents") == FULL_NET - 216667 == 575837,
+      and fc.get("intervention", {}).get("monthly_effect_cents") == 216666
+      and fc.get("forecast", {}).get("monthly_net_cents") == FULL_NET + 216666 == 1009170,
       f"tools={tools} net={fc.get('forecast', {}).get('monthly_net_cents')}")
 
 st, r = call("POST", "/chat", {"message": "帮我预演一下"})
