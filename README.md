@@ -264,7 +264,12 @@ python tests/run_all_smokes.py --fail-fast
 | `substate` | 取消订阅后盘点 / 合计 / 提醒的一致性 |
 | `llm` | 模型接入层：白名单、回退、failover、密钥不外泄 |
 
-另有两套专项单测：`tests/test_ai_enhancement.py`（意图策略与配置解析）、`tests/test_business_readonly.py`（写策略三档与动作粒度）。
+另有两套专项单测：`tests/test_ai_enhancement.py`（意图策略与配置解析）、`tests/test_business_readonly.py`（写策略三档与动作粒度）。这两套要按模块方式跑，否则找不到 `app` 包：
+
+```bash
+python -m tests.test_ai_enhancement
+python -m tests.test_business_readonly
+```
 
 ## 十一、适用范围
 

@@ -7,8 +7,8 @@ config.yaml
 __pycache__/
 *.py[cod]
 *.log
-.venv/
-venv/
+.venv*/
+venv*/
 .backend_run.log
 
 # 演示数据库（由 `python -m app.db.init_db --reset` 重建）

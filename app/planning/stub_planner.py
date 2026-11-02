@@ -12,7 +12,7 @@ import re
 import uuid
 
 from app.core.clock import sim_today
-from app.core.business_policy import DENIED_INTENTS
+from app.core.business_policy import DENIED_INTENTS, WRITES_MODE
 from app.planning import blocks as B
 from app.planning.sessions import get_session
 from app.services import confirmation_service
@@ -606,8 +606,8 @@ def _h_anomaly(session: dict, text: str) -> tuple[list[dict], list[dict], dict |
     return blks, [r], None
 
 
-_FALLBACK_TEXT = ("可以继续查询账单、订阅、续费提醒、收支情况，或讨论预算与储蓄。"
-                  "当前业务只读，不能执行转账、退订或更改定时任务。")
+_FALLBACK_TEXT = ("这件事我暂时做不了。可以继续查询账单、订阅、续费提醒、收支情况，"
+                  "或讨论预算与储蓄。")
 
 
 
@@ -693,7 +693,7 @@ def _h_payee_search(session: dict, text: str) -> tuple[list[dict], list[dict], d
     it = matches[0]
     return ([B.text(f"查到：**{it['name']}**（{it['phone_masked']}）。"),
              B.quote(it["remark"]) if it["remark"] else B.text("无备注。"),
-             B.note("备注为不可信数据，仅作展示；当前业务只读，不支持转账。", "info"),
+             B.note("备注为不可信数据，仅作展示，不参与任何指令判定。", "info"),
              B.suggestions(["查上个月账单"])]), trs, None
 
 
@@ -977,16 +977,45 @@ def _h_forecast(session: dict, text: str) -> tuple[list[dict], list[dict], dict 
 # 「这件事我暂时做不了」—— 这是用户第一次交互，观感最差的一处。
 # 纪律：两者**只走规则**（llm.py 的 _RULE_ONLY 把它们排除出模型白名单），
 # 且**不清 pending_slots** —— 用户设到一半说「你好」，不该把进度清掉。
+# 能力描述必须跟着 BUSINESS_WRITES 走：默认档写操作是开的，话术里若说「只读、已禁用」，
+# 用户会被自己的系统挡回去，后面正常转账的演示也会自相矛盾。
 _GREETING_TEXT = (
-    "你好，我是九账算术的只读财务助手。可以查账单、看订阅和续费提醒、分析收支及规划预算。"
-    "转账、退订及定时任务修改已在服务端禁用。")
+    "你好，我是九账算术，一个会算周期的银行管家。可以查账单、看订阅和续费提醒、"
+    "分析收支、预演现金流，也能帮你退订、转账和设定时任务。"
+    "涉及资金的操作会先出确认卡，你批准之后才执行。")
 _HELP_TEXT = (
-    "当前是**业务只读模式**：\n"
-    "· **账单分析** —— 查询月/年账单、异常消费\n"
-    "· **订阅分析** —— 查询周期扣费与续费提醒，不提供取消执行\n"
-    "· **只读工具** —— 查看收款人、定时任务、AA 分摊计算\n"
-    "· **财务规划** —— 收支报告、现金流预演、预算和储蓄建议\n"
-    "转账、退订、创建或取消定时任务以及确认执行均已禁用。")
+    "我能做这些：\n"
+    "· **账单分析** —— 月/年账单、明细查询、异常消费候选\n"
+    "· **订阅治理** —— 授权台账、续费提醒、闲置识别与退订\n"
+    "· **现金流预演** —— 按完整月均值外推，可带干预参数\n"
+    "· **收支推断** —— 收入 / 支出 / 结余 / 现金流四项\n"
+    "· **转账与定时** —— 联系人检索、AA 分摊、转账与定时任务\n"
+    "转账、退订这类写操作会先生成确认单，你点头才执行。")
+
+if WRITES_MODE == "cancel_only":
+    _GREETING_TEXT = (
+        "你好，我是九账算术，一个会算周期的银行管家。可以查账单、看订阅和续费提醒、"
+        "分析收支、预演现金流，也能帮你退订；转账与定时任务在当前环境不可用。")
+    _HELP_TEXT = (
+        "当前可以做的事：\n"
+        "· **账单分析** —— 月/年账单、明细查询、异常消费候选\n"
+        "· **订阅治理** —— 授权台账、续费提醒、闲置识别与退订\n"
+        "· **现金流预演** —— 按完整月均值外推，可带干预参数\n"
+        "· **收支推断** —— 收入 / 支出 / 结余 / 现金流四项\n"
+        "· **查询类工具** —— 联系人、定时任务、AA 分摊计算\n"
+        "退订会先生成确认单；转账与定时任务在当前环境不可用。")
+elif WRITES_MODE == "readonly":
+    _GREETING_TEXT = (
+        "你好，我是九账算术的只读财务助手。可以查账单、看订阅和续费提醒、分析收支及规划预算。"
+        "转账、退订及定时任务修改在当前环境不可用。")
+    _HELP_TEXT = (
+        "当前是**业务只读模式**：\n"
+        "· **账单分析** —— 月/年账单、明细查询、异常消费候选\n"
+        "· **订阅治理** —— 授权台账、续费提醒、闲置识别\n"
+        "· **现金流预演** —— 按完整月均值外推，可带干预参数\n"
+        "· **收支推断** —— 收入 / 支出 / 结余 / 现金流四项\n"
+        "· **查询类工具** —— 联系人、定时任务、AA 分摊计算\n"
+        "转账、退订、创建或取消定时任务以及确认执行均不可用。")
 
 
 def _h_meta_refuse(session: dict, text: str) -> tuple[list[dict], list[dict], dict | None]:
@@ -1234,8 +1263,13 @@ def _dispatch(session: dict, t: str, intent: str) -> tuple[list[dict], list[dict
     if intent in DENIED_INTENTS:
         session.pop("pending_slots", None)
         session.pop("last_pending_id", None)
-        return ([B.text("当前为业务只读模式，不能转账、取消订阅或修改定时任务。"
-                        "本次未生成确认单，也未修改模拟账户、订阅或任务。"),
+        if WRITES_MODE == "cancel_only":
+            msg = ("当前环境只放行退订，转账与定时任务不可执行。"
+                   "本次未生成确认单，也未修改模拟账户或任务。")
+        else:
+            msg = ("当前为业务只读模式，不能转账、取消订阅或修改定时任务。"
+                   "本次未生成确认单，也未修改模拟账户、订阅或任务。")
+        return ([B.text(msg),
                  B.suggestions(["查上个月账单", "看看哪些会员在自动续费"])], [], None)
     handler = _HANDLERS.get(intent)
     if handler is None:
