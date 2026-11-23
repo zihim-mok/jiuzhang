@@ -31,11 +31,10 @@
 
 ## 同步方式
 
-`index.html` 是部署副本，源头在 `frontend/web/standalone.html`。若离线版有更新，直接覆盖即可（唯一差异是底部横幅里的数据抓取日期）：
+`index.html` 是 `frontend/web/standalone.html` 的逐字节副本，两份文件内容完全相同，更新时直接覆盖即可：
 
 ```bash
 cp frontend/web/standalone.html docs/index.html
-# 再把横幅里的抓取日期改成与夹具一致的日期
 ```
 
 注：`standalone.html` 内注释提到的 `scripts/build_offline.py` 是夹具注入工具，未随本仓库提供；夹具数据已内嵌在 HTML 中，查看演示不需要该脚本。
